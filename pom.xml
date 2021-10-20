@@ -7,7 +7,7 @@
     <groupId>org.powernukkit.bedrock.network</groupId>
     <artifactId>bedrock-network-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.6.27-PN-SNAPSHOT</version>
+    <version>1.6.28-PN-SNAPSHOT</version>
     <inceptionYear>2018</inceptionYear>
     <url>https://github.com/PowerNukkit/Bedrock-Network</url>
 
@@ -110,50 +110,42 @@
                 <version>2.22.1</version>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.10</version>
                 <executions>
                     <execution>
-                        <id>attach-sources</id>
+                        <id>regex-property</id>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>regex-property</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <configuration> <!-- add this to disable checking -->
-                            <source>8</source>
-                            <doclint>none</doclint>
+                        <configuration>
+                            <name>module.name</name>
+                            <value>${project.groupId}.${project.artifactId}</value>
+                            <regex>-</regex>
+                            <replacement>.</replacement>
+                            <failIfNoMatch>false</failIfNoMatch>
                         </configuration>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0-M1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>3.0.0-M1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.0-M1</version>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <configuration>
+                        <archive>
+                            <manifestEntries>
+                                <Automatic-Module-Name>${module.name}</Automatic-Module-Name>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>
