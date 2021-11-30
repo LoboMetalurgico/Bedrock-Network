@@ -19,12 +19,14 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static com.nukkitx.network.raknet.RakNetConstants.*;
 
@@ -129,6 +131,8 @@ public class RakNetServer extends RakNet {
                 + UDP_HEADER_SIZE; // 1 (Packet ID), 16 (Magic), 1 (Protocol Version), 20/40 (IP Header)
 
         RakNetServerSession session = this.sessionsByAddress.get(packet.sender());
+        
+        log.trace("RakNet Server open connection request received from {} in context {}. MTU: {}, Protocol: {}", packet.sender(), ctx, mtu, protocolVersion);
         final InetSocketAddress clientAddress;
         final InetSocketAddress proxiedAddress;
         if (useProxyProtocol && (proxiedAddress = this.proxiedAddresses.get(packet.sender())) != null) {
