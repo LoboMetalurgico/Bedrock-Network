@@ -2,7 +2,6 @@ package com.nukkitx.network.raknet;
 
 import com.nukkitx.network.NetworkUtils;
 import com.nukkitx.network.util.DisconnectReason;
-import com.nukkitx.network.util.Preconditions;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoop;
@@ -19,12 +18,10 @@ public class RakNetClientSession extends RakNetSession {
     private int connectionAttempts;
     private long nextConnectionAttempt;
 
-    RakNetClientSession(RakNetClient rakNet, InetSocketAddress address, Channel channel, int mtu,
-                        int protocolVersion, EventLoop eventLoop) {
-        super(address, channel, mtu, protocolVersion, eventLoop);
+    RakNetClientSession(RakNetClient rakNet, InetSocketAddress address, Channel channel, EventLoop eventLoop, int mtu,
+                        int protocolVersion) {
+        super(address, channel, eventLoop, mtu, protocolVersion);
         this.rakNet = rakNet;
-        this.closed = true;
-        this.setState(null);
     }
 
     @Override
@@ -88,22 +85,6 @@ public class RakNetClientSession extends RakNetSession {
     }
 
     @Override
-    protected void onClose() {
-        if (this.rakNet.session == this) {
-            this.rakNet.session = null;
-        }
-    }
-
-    public void connect() {
-        Preconditions.checkState(this.closed, "Session is already started");
-        this.closed = false;
-
-        this.attemptConnection(System.currentTimeMillis());
-
-        this.setState(RakNetState.UNCONNECTED);
-    }
-
-    @Override
     public RakNet getRakNet() {
         return this.rakNet;
     }
@@ -158,12 +139,17 @@ public class RakNetClientSession extends RakNetSession {
     private void onConnectionRequestAccepted(ByteBuf buffer) {
         NetworkUtils.readAddress(buffer); // our address
         buffer.readUnsignedShort(); // system index
-        final int required = (this.address.getAddress() instanceof Inet6Address ? IPV6_MESSAGE_SIZE : IPV4_MESSAGE_SIZE) + 16;
-        while (buffer.isReadable(required)) {
-            NetworkUtils.readAddress(buffer);
+        final int required = IPV4_MESSAGE_SIZE + 16; // Address + 2 * Long - Minimum amount of data
+        long pongTime = 0;
+        try {
+            while (buffer.isReadable(required)) {
+                NetworkUtils.readAddress(buffer);
+            }
+            pongTime = buffer.readLong();
+            buffer.readLong();
+        } catch (IndexOutOfBoundsException ignored) {
+            // Hive sends malformed IPv6 address
         }
-        long pongTime = buffer.readLong();
-        buffer.readLong();
 
         this.sendNewIncomingConnection(pongTime);
 

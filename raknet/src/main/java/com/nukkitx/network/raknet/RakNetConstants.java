@@ -9,9 +9,9 @@ import java.net.InetSocketAddress;
 @UtilityClass
 public class RakNetConstants {
 
-    public static final byte RAKNET_PROTOCOL_VERSION = 9; // Mojang's version.
+    public static final byte RAKNET_PROTOCOL_VERSION = 10; // Mojang's version.
     public static final short MINIMUM_MTU_SIZE = 576;
-    public static final short MAXIMUM_MTU_SIZE = 1492;
+    public static short MAXIMUM_MTU_SIZE = 1400;
     /**
      * Maximum amount of ordering channels as defined in vanilla RakNet.
      */
@@ -34,6 +34,15 @@ public class RakNetConstants {
      * Time after {@link RakNetSession} is refreshed due to no activity.
      */
     public static final int SESSION_STALE_MS = 5000;
+    /**
+     * Time in millis after unconnected ping is resent till pong is not received.
+     */
+    public static final int RAKNET_PING_INTERVAL = 1000;
+    /**
+     * How many Stale Datagrams a {@link RakNetSession} can hold before been
+     * forcefully closed
+     */
+    public static final int MAXIMUM_STALE_DATAGRAMS = 256;
 
     /*
         Flags
